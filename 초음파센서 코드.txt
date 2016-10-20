@@ -1,0 +1,42 @@
+
+// 초음파 센서의 핀번호를 설정한다.
+int echoPin = 12;
+int trigPin = 13;
+
+void setup() {
+	Serial.begin(9600);
+	// trig를 출력모드로 설정, echo를 입력모드로 설정
+	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+}
+
+void loop() {
+	folat duration, distance;
+
+	// 초음파를 보낸다. 다 보내면 cho가 HIGH 상태로 대기하게 된다.
+	digitalWrite(trigPin, HIGH);
+	delay(10);
+	digitalWrite(trigPin, LOW);
+
+	// echoPin 이 HIGH를 유지한 시간을 저장한다.
+	duration = pulseIn(echoPin, HIGH);
+	// HIGH 였을 때 시간(초음파가 보냈다가 다시 들어온 시간)을 가지고 거리를 계산 한다.
+	distance = ((float)(340 * duration) / 10000) / 2;
+
+	Serial.print(distance);
+	Serial.println("cm");
+	// 수정한 값을 출력
+
+
+초음파 센서의 원리
+ 1. trig이 HIGH가 되면 초음파를 보내게 된다
+ 2. 초음파를 다 보내면 echo가 HIGH 상태를 유지하면서 되돌아오는 초음파를 받을 준비를 한다.
+ 3. 초음파가 앞에 물질에 부딪혀 다시 돌아오면 echo가 LOW로 바뀌게 된다.
+ 4. HIGHT에서 LOW로 바뀔 동안의 시간을 측정한다.
+
+pulseIn(pin, state) : 어느 핀에서 어떤 상태(state)로 얼마나 유지되고 있는지를 구한다.
+ ex) pulseIn(echoPin, HIGH) - echoPin이 HIGH상태가 되었을 때 시간을 재기 시작하여
+			       LOW상태가 될 때 까지의 시간을 잰다.
+
+초음파는 340m/s의 속도로 날라간다.(온도가 25도 일 때)
+이 때 속도와 센서가 보낸 시간을 이용하여 거리를 구한다. (왕복해서 오는 것이므로 결과를 2로 나눈다)
