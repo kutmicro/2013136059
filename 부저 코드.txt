@@ -1,0 +1,21 @@
+int pitch=0;		//음정을 담당
+int amp=0;		//음량을 담당
+
+void setup(){
+  pinMode(7,OUTPUT);	//피에조를 7번핀과 연결하여 출력으로 설정
+}
+void loop(){
+  pitch = 1136 - analogRead(0);
+  amp = analogRead(1)/10;
+  digitalWrite(7,1);
+  delayMicroseconds(amp);
+  digitalWrite(7,0);
+  delayMicroseconds(2*pitch-amp);
+}
+
+아날로그(A0) 입력값에 따라 음의 높낮이(Pitch)는 
+1136에서 113(1136-1023)까지 변하며 A4부터 C8이상의 음정을 표현 가능
+Pitch의 크기로 주파수를 조절
+
+amp는 소리의 크기를 조절
+주파수 내에서 소리가 울리는 비율을 조정해서 소리의 크기 조절
