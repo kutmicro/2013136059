@@ -1,0 +1,43 @@
+int switchA = 10;       // 스위치(switch) 핀 설정
+int led = 6;       // LED 핀 설정
+ 
+int state = LOW;      // LED 상태
+int reading;          // switch 상태
+int previous = LOW;   // switch 이전 상태
+ 
+long time = 0;        // LED가 ON/OFF 토글된 마지막 시간
+long debounce = 100;  // Debounce 타임 설정
+ 
+void setup()
+{
+  pinMode(switchA, INPUT_PULLUP); // switch 를 설정, 아두이노 풀업저항 사용
+  pinMode(led, OUTPUT);      // LED 설정
+}
+ 
+void loop()
+{
+  reading = digitalRead(switchA);  // switch 상태 읽음
+ 
+  //switch 가 눌려졌고 스위치 토글 눌림 경과시간이 Debounce 시간보다 크면 실행
+  if (reading == HIGH && previous == LOW && millis() - time > debounce) {
+    if (state == HIGH)    // LED 가 HIGH 면 LOW 로 바꿔준다.
+      state = LOW;
+    else                  // LED 가 LOW 면 HIGH 로 바꿔준다.
+      state = HIGH;
+ 
+    time = millis();
+  }
+ 
+  digitalWrite(led, state);
+ 
+  previous = reading;
+}
+
+스위치는 기계적인 장치이므로 켜거나 끌 때 기계적인 진동이나 접촉에 의해서 스위치가
+짧은 시간에 여러번 ON/OFF 된 것으로 인식할 수 있다.
+이런 현상을 Bounce현상이라고 하며 이것을 없애 주는것이 Debounce이다.
+소프트웨어적으로 Debounce 시간을 설정해두고
+이 시간보다 짧은 시간에 일어나는 스위치의 ON/OFF 는 무시한다.
+
+millis() : 아두이노 보드가 실행된 후 부터의 시간을 반환한다.
+unsigned long 변수에 저장해야한다.

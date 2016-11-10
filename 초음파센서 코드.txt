@@ -11,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-	folat duration, distance;
+	float duration, distance;
 
 	// 초음파를 보낸다. 다 보내면 echo가 HIGH 상태로 대기하게 된다.
 	digitalWrite(trigPin, HIGH);
@@ -26,7 +26,7 @@ void loop() {
 	Serial.print(distance);
 	Serial.println("cm");
 	// 수정한 값을 출력
-
+}
 
 초음파 센서의 원리
  1. trig이 HIGH가 되면 초음파를 보내게 된다
@@ -40,3 +40,14 @@ pulseIn(pin, state) : 어느 핀에서 어떤 상태(state)로 얼마나 유지되고 있는지를 구
 
 초음파는 340m/s의 속도로 날라간다.(온도가 25도 일 때)
 이 때 속도와 센서가 보낸 시간을 이용하여 거리를 구한다. (왕복해서 오는 것이므로 결과를 2로 나눈다)
+
+
+*200 ~ 1500
+200 350 도
+350 500 레
+500 650 미
+650 800 파
+800 950 솔
+950 1100 라
+1100 1250 시
+1250 1400 도

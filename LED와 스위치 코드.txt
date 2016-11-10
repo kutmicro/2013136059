@@ -1,0 +1,35 @@
+
+// LED 핀설정
+int led = 7;
+
+// 스위치 핀설정
+int mySwitch = 9;
+
+void setup() {
+	// 시리얼 모니터
+	Serial.begin(9600);
+	// LED를 OUTPUT으로 설정
+	pinMode(led, OUTPUT);
+	// 스위치 설정, 아두이노 풀업저항 사용
+	pinMode(mySwitch, INPUT_PULLUP;
+}
+
+void loop() {
+	// 스위치를 눌렀을때(LOW) LED를 킨다
+	if(digitalRead(mySwitch) == LOW) {
+		digitalWrite(led, HIGH);
+		Sirial.println("Switch On");
+	}
+	else if(digitalRead(mySwitch) == HIGH) {
+		digitalWrite(led, LOW);
+		Sirial.println("Switch Off");
+	}
+	else {
+		digitalWrite(led, LOW);
+		Sirial.println("No Switch");
+	}
+}
+
+digitalRead(pin) : 스위치의 상태를 읽었을때 스위치 누르면 LOW, 누르지 않았을때는 HIGH상태가 된다.
+
+digitalWrite(pin, value) : LED를 키려면 HIGH, 끄려면 LOW 입력
