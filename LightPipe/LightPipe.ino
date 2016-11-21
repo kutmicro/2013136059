@@ -3,9 +3,10 @@ int RTrigPin = 13;    // Volume trig pin      |         13 | Trig
 int REchoPin = 12;    // Volume echo pin      |         12 | Echo
 int LTrigPin = 11;    // Scale  trig pin      |         11 | Trig
 int LEchoPin = 10;    // Scale  echo pin      |         10 | Echo
-int switchRec = 9;    // Record switch pin    |          9 | +
-int switchPly = 8;    // Play switch pin      |          8 | +
-int LED = 7;          // LED pin              |          7 | +
+int switchRecPin = 9; // Record switch pin    |          9 | +
+int switchPlyPin = 8; // Play switch pin      |          8 | +
+int LEDPin = 7;       // LED pin              |          7 | +
+int piezoPin = 6;     // Piezo buzzer pin     |          6 | +
 // 초음파센서로 받은 값 저장
 float valueR;  // Right value (volume)
 float valueL;  // Left value (scale)
@@ -21,6 +22,10 @@ long debounce = 100;   // debounce time
 // 작업 상태
 char work;       // now work state : 'n' - normal, 'r' - record
                  //                  'p' - play record file
+// 음계
+char scale;      // a : 도   b : 레   c : 미   d : 파
+                 // e : 솔   f : 파   g : 시   h : (높은)도
+                 // x : 없음
 
 void setup() {
   Serial.begin(9600);
@@ -30,26 +35,31 @@ void setup() {
   pinMode(LTrigPin, OUTPUT);
   pinMode(LEchoPin, INPUT);
   // switch 입력모드로 설정, 아두이노 내부 풀업저항 사용
-  pinMode(switchRec, INPUT_PULLUP);
-  pinMode(switchPly. INPUT_PULLUP);
+  pinMode(switchRecPin, INPUT_PULLUP);
+  pinMode(switchPlyPin, INPUT_PULLUP);
   // LED 출력모드로 설정
-  pinMode(LED, OUTPUT);
-}
+  pinMode(LEDPin, OUTPUT);
+  // piezo 출력모드로 설정
+  pinMode(piezoPin, OUTPUT);
+} // setup()
 
   void loop() {
 
-    readSR = digitalRead(switchRec);   // switchRec 상태 읽음
+    readSR = digitalRead(switchRecPin);   // switchRec 상태 읽음
     // switchRec가 눌려졌고 스위치 토글 경과 시간이 debounce 시간보다 크면 실행
-    if(readSR == HIGH && prevSR == LOW && (millis() - timeTg > debounce) {
+    if(readSR == HIGH && prevSR == LOW && (millis() - timeTg > debounce)) {
       if(stateLED == HIGH) { // LED가 HIGH면 LOW로 바꿔준다
         stateLED = LOW;
+        work = 'n';
       }
-      else                  // LED가 LOW면 HIGH로 바꿔준다
+      else {                 // LED가 LOW면 HIGH로 바꿔준다
         stateLED = HIGH;
+        work = 'r';
+      }
       timeTg = millis();
     }
-    digitalWrite(LED, stateLED);
-    previous = readSR;
+    digitalWrite(LEDPin, stateLED);
+    prevSR = readSR;
 
     // 초음파센서R, 초음파를 보냄, 다 보낸 후 echoPin이 HIGH 상태로 대기
     digitalWrite(RTrigPin, HIGH);
@@ -64,8 +74,102 @@ void setup() {
     digitalWrite(LTrigPin, LOW);
     valueL = pulseIn(LEchoPin, HIGH);
 
+    // 읽은 초음파 값 시리얼 출력
     Serial.print(valueR);
     Serial.print(", ");
     Serial.println(valueL);
+
+    // 읽은 초음파 값을 음계와 음량으로 변환
+    getVolume();
+    scale = getScale();
+    Serial.print(valueV);
+    Serial.print(" => ");
+    Serial.println(scale);
     
+} // loop()
+
+void getVolume() {
+  if(valueR < 200)
+    valueV = 0;
+  else if (valueR > 1400)
+    valueV = 1023;
+  else
+    valueV = map(valueR, 200, 1400, 0, 1023);
 }
+char getScale() {
+  if( (valueL > 200) && (valueL <= 350) ) { // 거리가 200 ~ 350 이면 '도'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1911 - valueV);
+    }
+      return 'a';
+  }
+  else if( (valueL > 350) && (valueL <= 500) ) { // 거리가 350 ~ 500 이면 '레'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1702 - valueV);
+    }
+      return 'b';
+  }
+  else if( (valueL > 500) && (valueL <= 650) ) { // 거리가 500 ~ 650 이면 '미'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1517 - valueV);
+    }
+      return 'c';
+  }
+  else if( (valueL > 650) && (valueL <= 800) ) { // 거리가 650 ~ 800 이면 '파'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1431 - valueV);
+    }
+      return 'd';
+  }
+  else if( (valueL > 800) && (valueL <= 950) ) { // 거리가 800 ~ 950 이면 '솔'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1276 - valueV);
+    }
+      return 'e';
+  }
+  else if( (valueL > 950) && (valueL <= 1100) ) { // 거리가 950 ~ 1100 이면 '라'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1137 - valueV);
+    }
+      return 'f';
+  }
+  else if( (valueL > 1100) && (valueL <= 1250) ) { // 거리가 1100 ~ 1250 이면 '시'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1012 - valueV);
+    }
+      return 'g';
+  }
+  else if( (valueL > 1250) && (valueL <= 1400) ) { // 거리가 1250 ~ 1400 이면 '(높은)도'
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 995 - valueV);
+    }
+      return 'x';
+  }
+  else
+    return null;
+} // getScale()
+
