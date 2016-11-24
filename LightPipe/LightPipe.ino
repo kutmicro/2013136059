@@ -21,6 +21,7 @@ long timeTg = 0;       // time LED toggled at
 long debounce = 100;   // debounce time
 // 작업 상태
 char work;       // now work state : 'n' - normal, 'r' - record
+
                  //                  'p' - play record file
 // 음계
 char scale;      // a : 도   b : 레   c : 미   d : 파
@@ -165,11 +166,11 @@ char getScale() {
       digitalWrite(piezoPin, 1);
       delayMicroseconds(valueV);
       digitalWrite(piezoPin, 0);
-      delayMicroseconds(2 * 995 - valueV);
+      delayMicroseconds(2 * 965 - valueV);
     }
-      return 'x';
+      return 'h';
   }
   else
-    return null;
+    return 'x';
 } // getScale()
 
