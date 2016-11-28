@@ -11,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-  /*
+  
   for(long i = 0; i < 1000000; i = i + 2552) {  // '도'
       digitalWrite(piezoPin, 1);
       delayMicroseconds(valueV);
@@ -39,7 +39,7 @@ void loop() {
       digitalWrite(piezoPin, 0);
       delayMicroseconds(2 * 1431 - valueV);
   }
-  delay(500);*/
+  delay(500);
   for(long i = 0; i < 1000000; i = i + 2552) {  // '솔'
       digitalWrite(piezoPin, 1);
       delayMicroseconds(valueV);
