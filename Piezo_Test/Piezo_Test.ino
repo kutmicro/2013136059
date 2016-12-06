@@ -4,14 +4,13 @@
 int piezoPin = 6;
 
 // 음량 설정(0 ~ 1023)
-int valueV = 30;
+int valueV = 200;
 
 void setup() {
   pinMode(piezoPin, OUTPUT);  // fiezoPin 출력모드 설정
 }
 
 void loop() {
-  /*
   for(long i = 0; i < 1000000; i = i + 2552) {  // '도'
       digitalWrite(piezoPin, 1);
       delayMicroseconds(valueV);
@@ -39,7 +38,7 @@ void loop() {
       digitalWrite(piezoPin, 0);
       delayMicroseconds(2 * 1431 - valueV);
   }
-  delay(500);*/
+  delay(500);
   for(long i = 0; i < 1000000; i = i + 2552) {  // '솔'
       digitalWrite(piezoPin, 1);
       delayMicroseconds(valueV);

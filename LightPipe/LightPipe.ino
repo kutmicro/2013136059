@@ -21,12 +21,15 @@ long timeTg = 0;       // time LED toggled at
 long debounce = 100;   // debounce time
 // 작업 상태
 char work;       // now work state : 'n' - normal, 'r' - record
-
                  //                  'p' - play record file
 // 음계
 char scale;      // a : 도   b : 레   c : 미   d : 파
                  // e : 솔   f : 파   g : 시   h : (높은)도
                  // x : 없음
+// 녹음 저장 공간
+int recordVolume[1000];  // record volume here
+char recordScale[1000];  // record scale here
+int recordN = 0;         // recordFile array index
 
 void setup() {
   Serial.begin(9600);
@@ -46,6 +49,12 @@ void setup() {
 
   void loop() {
 
+    // switchPly가 눌려지면 녹음 파일 재생
+    if(digitalRead(switchPlyPin) == LOW) {
+      for(int i = 0; i <= recordN; i++)
+        readRecord(recordVolume[i], recordScale[i]);
+    }
+    
     readSR = digitalRead(switchRecPin);   // switchRec 상태 읽음
     // switchRec가 눌려졌고 스위치 토글 경과 시간이 debounce 시간보다 크면 실행
     if(readSR == HIGH && prevSR == LOW && (millis() - timeTg > debounce)) {
@@ -56,6 +65,7 @@ void setup() {
       else {                 // LED가 LOW면 HIGH로 바꿔준다
         stateLED = HIGH;
         work = 'r';
+        recordN = 0;        // work가 'n' -> 'r'로 바뀌면 recordN 초기화
       }
       timeTg = millis();
     }
@@ -86,6 +96,13 @@ void setup() {
     Serial.print(valueV);
     Serial.print(" => ");
     Serial.println(scale);
+
+    // 작업상태가 record이면 연주 기록 저장
+    if(work == 'r') {
+      recordN++;
+      recordVolume[recordN] = valueV;
+      recordScale[recordN] = scale;
+    }
     
 } // loop()
 
@@ -93,9 +110,9 @@ void getVolume() {
   if(valueR < 200)
     valueV = 0;
   else if (valueR > 1400)
-    valueV = 1023;
+    valueV = 300;
   else
-    valueV = map(valueR, 200, 1400, 0, 1023);
+    valueV = map(valueR, 200, 1400, 0, 300);
 }
 char getScale() {
   if( (valueL > 200) && (valueL <= 350) ) { // 거리가 200 ~ 350 이면 '도'
@@ -173,4 +190,73 @@ char getScale() {
   else
     return 'x';
 } // getScale()
+void readRecord(int vol, char sc) {
+  if( sc == 'a' ) {   // 'a'를 읽으면 '도'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1911 - valueV);
+    }
+  }
+  else if( sc == 'b' ) { // 'b'를 읽으면 '레'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1702 - valueV);
+    }
+  }
+  else if( sc == 'c' ) { // 'c'를 읽으면 '미'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1517 - valueV);
+    }
+  }
+  else if( sc == 'd' ) { // 'd'를 읽으면 '파'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(valueV);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1431 - valueV);
+    }
+  }
+  else if( sc == 'e' ) { // 'e'를 읽으면 '솔'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1276 - valueV);
+    }
+  }
+  else if( sc == 'f' ) { // 'f'를 읽으면 '라'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1137 - valueV);
+    }
+  }
+  else if( sc == 'g' ) { // 'g'를 읽으면 '시'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 1012 - valueV);
+    }
+  }
+  else if( sc == 'h' ) { // 'h'를 읽으면 '도'재생
+    for(long i = 0; i < 1000000; i = i + 2552) {
+      digitalWrite(piezoPin, 1);
+      delayMicroseconds(vol);
+      digitalWrite(piezoPin, 0);
+      delayMicroseconds(2 * 965 - valueV);
+    }
+  }
+    else if(sc == 'x') { // 'x'를 읽으면 1초 쉼
+      delayMicroseconds(1000);
+  }
+} // readRecord()
 
