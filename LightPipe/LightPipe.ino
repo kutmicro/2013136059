@@ -187,8 +187,10 @@ char getScale() {
     }
       return 'h';
   }
-  else
+  else {
+    delayMicroseconds(1000);
     return 'x';
+  }
 } // getScale()
 void readRecord(int vol, char sc) {
   if( sc == 'a' ) {   // 'a'를 읽으면 '도'재생
